@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Cabinet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin: 20px;
+        }
+        .add-dropdown {
+            margin-bottom: 30px;
+        }
+        .cabinet {
+            width: 60%;
+            margin: auto;
+            background: #FFFFFF;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+            color: black;
+            margin-top: 30px;
+        }
+        .drawer {
+            background: #D8BFD8;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .drawer:hover {
+            background: #C8A2C8;
+        }
+        .med-list {
+            display: none; /* Ensure med lists are hidden initially */
+            background: #F3E5F5;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            color: black;
+        }
+        .entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            align-items: center;
+        }
+        .cubby-number {
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .medicine-name {
+            flex-grow: 1;
+            text-align: left;
+            margin-left: 1.5cm;
+        }
+        .delete-btn {
+            background: none;
+            color: red;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            color: darkred;
+        }
+    </style>
+</head>
+<body>
+    <h2>ACE DUMAGUETE DOCTORS INC - Pharmacy</h2>
+    
+    <input type="text" class="search-box" id="searchInput" placeholder="Search..." onkeyup="searchPage()">
+    
+    <div class="add-dropdown" id="addDropdown">
+        <form onsubmit="addMedicine(event)">
+            <input type="text" id="cabinetNumber" placeholder="Cabinet Number or Regulated Category" oninput="toggleFields()">
+            <select id="medPosition">
+                <option value="upper">Upper</option>
+                <option value="lower">Lower</option>
+            </select>
+            <input type="number" id="cubbyNumber" placeholder="GNDL #">
+            <input type="text" id="medicineName" placeholder="Medicine Name">
+            <button type="submit">Add</button>
+        </form>
+    </div>
+    
+    <div class="cabinet" id="medicineCabinet"></div>
+
+    <script>
+        const cabinetContainer = document.getElementById("medicineCabinet");
+
+        // Function to load previously saved data
+        function loadSavedData() {
+            const savedData = JSON.parse(localStorage.getItem("medicineData")) || {};
+            Object.keys(savedData).forEach(id => {
+                const targetList = document.getElementById(id);
+                if (targetList) {
+                    targetList.innerHTML = savedData[id];
+                }
+            });
+        }
+
+        // Creating the cabinet structure with upper and lower sections
+        for (let i = 1; i <= 13; i++) {
+            let cabinetDiv = document.createElement("div");
+            cabinetDiv.classList.add("drawer");
+            cabinetDiv.textContent = `Cabinet ${i}`;
+            cabinetDiv.onclick = function() {
+                let medsSection = this.nextElementSibling;
+                medsSection.style.display = medsSection.style.display === "block" ? "none" : "block";
+            };
+            
+            let medsSection = document.createElement("div");
+            medsSection.classList.add("med-list");
+            medsSection.innerHTML = `
+                <div class='drawer' onclick="toggleMeds(this)">Upper Meds</div>
+                <div class='med-list' id='cabinet${i}-upper'></div> <!-- Hidden by default -->
+                <div class='drawer' onclick="toggleMeds(this)">Lower Meds</div>
+                <div class='med-list' id='cabinet${i}-lower'></div> <!-- Hidden by default -->
+            `;
+            
+            cabinetContainer.appendChild(cabinetDiv);
+            cabinetContainer.appendChild(medsSection);
+        }
+
+        // Function to toggle visibility of upper/lower med sections independently
+        function toggleMeds(element) {
+            let medList = element.nextElementSibling;
+
+            // Ensure that only med-list containers toggle visibility
+            if (medList && medList.classList.contains('med-list')) {
+                medList.style.display = medList.style.display === "block" ? "none" : "block"; // Toggle between visible and hidden
+            }
+        }
+
+        // Categories for additional sections
+        let categories = ["Regulated Drugs 1", "Regulated Drugs 2", "Loose Tabs", "Refrigerated Drugs"];
+        categories.forEach(category => {
+            let categoryDiv = document.createElement("div");
+            categoryDiv.classList.add("drawer");
+            categoryDiv.textContent = category;
+            categoryDiv.onclick = function() {
+                let medsSection = this.nextElementSibling;
+                medsSection.style.display = medsSection.style.display === "block" ? "none" : "block";
+            };
+            
+            let medsSection = document.createElement("div");
+            medsSection.classList.add("med-list");
+            medsSection.id = category.toLowerCase().replace(/\s+/g, '-');
+            
+            cabinetContainer.appendChild(categoryDiv);
+            cabinetContainer.appendChild(medsSection);
+        });
+        
+        loadSavedData();
+    </script>
+</body>
+</html>
